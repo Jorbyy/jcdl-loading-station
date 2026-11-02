@@ -3,185 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Submission Form</title>
+    <title>JCDL Loading Station Hub</title>
     <style>
-        :root {
-            --primary-color: #1a73e8;
-            --background-color: #f8f9fa;
-            --surface-color: #ffffff;
-            --text-color: #202124;
-            --border-color: #dadce0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .form-container {
-            background-color: var(--surface-color);
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 24px;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #1557b0;
-        }
-
-        button:disabled {
-            background-color: #a8c7fa;
-            cursor: not-allowed;
-        }
-
-        .message {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 4px;
-            text-align: center;
-            display: none;
-        }
-
-        .success {
-            background-color: #e6f4ea;
-            color: #137333;
-            display: block;
-        }
-
-        .error {
-            background-color: #fce8e6;
-            color: #c5221f;
-            display: block;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; max-width: 500px; width: 100%; padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        .step { display: none; }
+        .step.active { display: block; }
+        label { display: block; margin-bottom: 10px; font-weight: bold; }
+        input[type="tel"], input[type="text"], input[type="file"] { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .sq-btn { padding: 20px 10px; border: 2px solid #e0e0e0; border-radius: 10px; background: #fff; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.2s; }
+        .sq-btn:hover { border-color: #3498db; background: #f0f8ff; }
+        .category-header { background: #34495e; color: white; padding: 12px; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
+        .promo-list { display: none; padding-left: 10px; margin-bottom: 20px; }
+        .promo-list.active { display: block; }
+        .promo-btn { display: block; width: 100%; text-align: left; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; }
+        .promo-btn:hover { border-color: #3498db; }
+        .btn-primary { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-primary:disabled { background: #95a5a6; cursor: not-allowed; }
+        .qr-section { text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; }
+        .qr-section img { width: 200px; height: 200px; margin-bottom: 15px; border-radius: 10px;}
+        .copy-box { background: #e9ecef; padding: 10px; border-radius: 5px; display: inline-block; margin-bottom: 20px; }
+        #loadingSpinner { display: none; text-align: center; margin-top: 20px; font-weight: bold; color: #e67e22; }
     </style>
 </head>
 <body>
 
-    <div class="form-container">
-        <h2>Submit Details</h2>
-        <form id="submissionForm">
-            <div class="form-group">
-                <label for="number">Number</label>
-                <input type="text" id="number" name="number" required placeholder="Enter number">
-            </div>
-            
-            <div class="form-group">
-                <label for="network">Network</label>
-                <input type="text" id="network" name="network" required placeholder="Enter network">
-            </div>
+<div class="container">
+    <h2>JCDL Loading Station Hub</h2>
 
-            <button type="submit" id="submitBtn">Submit Data</button>
-            <div id="statusMessage" class="message"></div>
-        </form>
+    <!-- STEP 1: Phone Number -->
+    <div id="step1" class="step active">
+        <label>Enter Mobile Number to Load:</label>
+        <input type="tel" id="mobileNum" placeholder="09xxxxxxxxx" maxlength="11">
+        <button class="btn-primary" onclick="nextStep(2)">Next</button>
     </div>
 
-    <script>
-        // Directly assigning your provided Google Apps Script Web App URL
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxJch5bIA4LoP0XPinXOL4N1KOt_6zITXEL0QVEDYhRi35PyfRHwWDFknBQl-ifb-fOTQ/exec';
-        const form = document.getElementById('submissionForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const statusMessage = document.getElementById('statusMessage');
+    <!-- STEP 2: Choose Network -->
+    <div id="step2" class="step">
+        <label>Select Network:</label>
+        <div class="grid">
+            <button class="sq-btn" onclick="selectNetwork('Globe')">Globe & Broadbands<br>(10% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('TM')">TM<br>(10% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('Smart')">Smart<br>(5% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('TNT')">TNT<br>(5% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('Gomo')">Gomo<br>(10% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('DITO')">DITO<br>(5% OFF)</button>
+        </div>
+        <button class="btn-primary" onclick="nextStep(1)" style="background:#7f8c8d;">Back</button>
+    </div>
 
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            
-            // UI Feedback: Disable button and show loading state
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            statusMessage.className = 'message';
-            statusMessage.textContent = '';
+    <!-- STEP 3: Choose Promo -->
+    <div id="step3" class="step">
+        <label>Search & Select Promo:</label>
+        <input type="text" id="searchPromo" placeholder="Type to search..." onkeyup="filterPromos()">
+        <div id="categoriesContainer"></div>
+        <button class="btn-primary" onclick="nextStep(2)" style="background:#7f8c8d; margin-top: 20px;">Back</button>
+    </div>
 
-            // Package form data
-            const formData = new FormData(form);
+    <!-- STEP 4: Payment -->
+    <div id="step4" class="step">
+        <h3 style="text-align: center;">Scan to Pay</h3>
+        <div class="qr-section">
+            <!-- This looks for a file named qr.jpg in your GitHub -->
+            <img src="qr.jpg" alt="Upload qr.jpg to Github" onerror="this.src='https://via.placeholder.com/200?text=Upload+qr.jpg+to+Github'">
+            <div>
+                <span class="copy-box">GCash: <strong id="gcashNum">09604504287</strong> (JTD)
+                <button onclick="navigator.clipboard.writeText('09604504287'); alert('Copied!');" style="cursor:pointer; margin-left: 5px;">Copy</button></span>
+            </div>
+            <p>Please pay: <strong id="amountToPay" style="color:#27ae60; font-size: 22px;">₱0.00</strong></p>
+        </div>
+        <label>Upload Payment Receipt:</label>
+        <input type="file" id="receiptImg" accept="image/*" onchange="compressImage(event)">
+        <canvas id="canvas" style="display:none;"></canvas> 
+        <button class="btn-primary" id="submitBtn" onclick="submitOrder()" disabled>Submit Payment</button>
+        <div id="loadingSpinner">Processing... Please wait...</div>
+        <button class="btn-primary" onclick="nextStep(3)" style="background:#7f8c8d;">Back</button>
+    </div>
 
-            // Execute the fetch request to the Web App URL
-            fetch(scriptURL, { 
-                method: 'POST', 
-                body: formData 
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json(); 
-            })
-            .then(data => {
-                // Success Handling
-                statusMessage.textContent = 'Data submitted successfully!';
-                statusMessage.className = 'message success';
-                form.reset();
-            })
-            .catch(error => {
-                // Error Handling
-                console.error('Error!', error.message);
-                statusMessage.textContent = 'Failed to submit data. Please try again.';
-                statusMessage.className = 'message error';
-            })
-            .finally(() => {
-                // Restore button state
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Data';
+    <!-- STEP 5: Success Screen -->
+    <div id="step5" class="step" style="text-align: center;">
+        <h3 style="color: #2ecc71;">Order Submitted!</h3>
+        <p>Your payment receipt has been sent to JCDL Loading Station.</p>
+        <p style="margin-top: 20px; font-size: 14px; color: #7f8c8d;">Kindly check your phone in a few minutes to see if it's loaded already.</p>
+        <button class="btn-primary" onclick="location.reload()" style="margin-top: 30px;">Load Another Number</button>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJch5blA4LoP0XPinXOL4N1KOt_6zlTXEL0QVEDYhRi35PyfRHwWDFknBQl-ifb-fOTQ/exec";
+
+    let orderDetails = { number: '', network: '', promo: '', price: 0, imageBase64: '' };
+
+    const promos = {
+        'Globe': {
+            'Go Promos': [{name: 'Go59', price: 53.00}, {name: 'Go+99', price: 89.00}, {name: 'Go+129', price: 116.00}, {name: 'Go+140', price: 126.00}, {name: 'Go+149', price: 134.00}, {name: 'Go+250', price: 225.00}, {name: 'GoExtra59', price: 53.00}, {name: 'GoExtra99', price: 89.00}, {name: 'GoExtra109', price: 98.00}, {name: 'GoExtra179', price: 161.00}, {name: 'GoExtra199', price: 179.00}],
+            'Unli & Surf': [{name: 'Surf4all99', price: 89.00}, {name: 'Surf4all249', price: 224.00}, {name: 'GOUNLI20', price: 18.00}, {name: 'GOUNLI30', price: 27.00}, {name: 'GOUNLI50', price: 45.00}, {name: 'GOUNLI95', price: 86.00}, {name: 'GOUNLI180', price: 162.00}, {name: 'GOUNLI350', price: 315.00}, {name: 'Unli5G59', price: 53.00}, {name: 'Unli5G80', price: 72.00}, {name: 'GO59 For Students', price: 53.00}, {name: 'Go+99 Go Share etc.', price: 89.00}, {name: 'UnliGo99', price: 89.00}, {name: 'Go+109', price: 98.00}, {name: 'Go+179', price: 161.00}],
+            'Tingi Load': [{name: 'Tingi 1gb @12', price: 12.00}, {name: 'Tingi 1gb @32', price: 32.00}, {name: 'Tingi 1gb @52', price: 52.00}],
+            'Broadband': [{name: 'HOMESURF50', price: 45.00}, {name: 'HOMESURF199', price: 179.00}, {name: 'HOMESURF599', price: 539.00}, {name: 'HOMESURF999', price: 899.00}, {name: 'HOMESURF1499', price: 1349.00}, {name: 'UNLISURF 249', price: 224.00}, {name: 'UNLISURF 299', price: 269.00}, {name: 'UNLISURF 399', price: 359.00}, {name: 'UNLISURF 499', price: 449.00}, {name: 'UNLISURF 749', price: 674.00}, {name: 'UNLISURF 799', price: 719.00}, {name: 'UNLISURF 999', price: 899.00}, {name: 'UNLISURF 1599', price: 1439.00}]
+        },
+        'TM': {
+            'EZ Promos': [{name: 'EZ50 FUNALIW', price: 45.00}, {name: 'EZ75 ALLNET', price: 68.00}, {name: 'EZ99', price: 89.00}, {name: 'EZ110', price: 99.00}, {name: 'EZ50 5G', price: 45.00}, {name: 'EZ140', price: 126.00}, {name: 'EZ299', price: 269.00}, {name: 'EZ599', price: 539.00}, {name: 'EZPLAN159', price: 143.00}, {name: 'EZPLAN300', price: 270.00}],
+            'Surf & Combo': [{name: 'COMBO20', price: 18.00}, {name: 'PAWERSURF20', price: 18.00}, {name: 'PAWERSURF30', price: 27.00}, {name: 'FBML15', price: 14.00}, {name: 'ANS20', price: 18.00}, {name: 'ANS30', price: 27.00}, {name: 'SURF4ALL99', price: 89.00}, {name: 'ALLSURF99', price: 89.00}, {name: 'ALLSURF110', price: 99.00}, {name: 'ALLSURF149', price: 134.00}, {name: 'BIGBENTE', price: 18.00}, {name: 'COMBO10', price: 9.00}, {name: 'PawerSurf99', price: 89.00}, {name: 'AN10', price: 9.00}, {name: 'AN70', price: 63.00}]
+        },
+        'Smart': {
+            'Giga Promos': [{name: 'Giga Video/Stories 50', price: 48.00}, {name: 'Giga Video/Stories 99', price: 94.00}, {name: 'Giga Power 75', price: 71.00}, {name: 'Giga Power 149', price: 142.00}],
+            'Data & Magic': [{name: 'Surfsaya 49', price: 47.00}, {name: 'All data 50', price: 48.00}, {name: 'All data 99', price: 94.00}, {name: 'All data 299', price: 284.00}, {name: 'Magic Data 99', price: 94.00}, {name: 'Magic Data 199', price: 189.00}, {name: 'Magic Data 399', price: 379.00}],
+            'Other': [{name: 'All Net 30', price: 29.00}, {name: 'All Net 50', price: 48.00}, {name: 'All Net 99', price: 94.00}, {name: 'Tingi 1gb', price: 12.00}]
+        },
+        'TNT': {
+            'Surfsaya': [{name: 'Surfsaya 20', price: 19.00}, {name: 'Surfsaya 49', price: 47.00}],
+            'Other': [{name: 'TikTok saya 50', price: 48.00}, {name: 'Saya all 99', price: 94.00}, {name: 'ML 10', price: 10.00}, {name: 'FB+ML 50', price: 48.00}, {name: 'Panalo 30', price: 29.00}]
+        },
+        'Gomo': {
+            'Data Offers': [{name: 'NoExpiryData149', price: 134.00}, {name: 'NoExpiryData249', price: 224.00}, {name: 'NoExpiryData449', price: 404.00}, {name: 'UnliData799', price: 719.00}, {name: 'UnliData999', price: 899.00}, {name: 'UnliData1699', price: 1529.00}],
+            'Fiber': [{name: 'UnliFiber299', price: 269.00}, {name: 'UnliFiber399', price: 359.00}, {name: 'UnliFiber899', price: 809.00}, {name: 'UnliFiber1199', price: 1079.00}, {name: 'UnliFiber+UnliData349', price: 314.00}, {name: 'UnliFiber+UnliData399', price: 359.00}, {name: 'UnliFiber+UnliData449', price: 404.00}, {name: 'UnliFiber+UnliData499', price: 449.00}, {name: 'UnliFiber+UnliData649', price: 584.00}, {name: 'UnliFiber+UnliData699', price: 629.00}, {name: 'UnliFiber+UnliData1299', price: 1169.00}, {name: 'UnliFiber+UnliData1499', price: 1349.00}, {name: 'UnliFiber+UnliData1599', price: 1439.00}, {name: 'UnliFiber+UnliData1799', price: 1619.00}, {name: 'UnliFiber+UnliData2099', price: 1889.00}, {name: 'UnliFiber+UnliData2299', price: 2069.00}]
+        },
+        'DITO': {
+            'Level Up': [{name: 'Level up 99', price: 94.00}, {name: 'Level up 109', price: 104.00}, {name: 'Level up 129', price: 123.00}, {name: 'Level up 199', price: 189.00}, {name: 'Level up social 20', price: 19.00}, {name: 'Level up social 50', price: 48.00}, {name: 'Level up social 70', price: 67.00}],
+            'Data & Tingi': [{name: 'Data 20', price: 19.00}, {name: 'Data 30', price: 29.00}, {name: 'Data 50', price: 48.00}, {name: 'Data boosters-live it 50', price: 48.00}, {name: 'Data boosters-play it 50', price: 48.00}, {name: 'Tingi 1gb', price: 12.00}, {name: 'Tingi 2gb', price: 22.00}, {name: 'Tingi 3gb', price: 32.00}]
+        }
+    };
+
+    function nextStep(step) {
+        if(step === 2 && document.getElementById('mobileNum').value.length < 10) {
+            alert('Please enter a valid mobile number'); return;
+        }
+        if(step === 2) orderDetails.number = document.getElementById('mobileNum').value;
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+    }
+
+    function selectNetwork(network) {
+        orderDetails.network = network;
+        let html = '';
+        let cats = promos[network];
+        for (let category in cats) {
+            let catId = category.replace(/[^a-zA-Z0-9]/g, '');
+            html += `<div class="category-header" onclick="toggleCategory('${catId}')">${category} ▼</div>`;
+            html += `<div class="promo-list" id="${catId}">`;
+            cats[category].forEach(p => {
+                html += `<button class="promo-btn" onclick="selectPromo('${p.name}', ${p.price})"><strong>${p.name}</strong> - ₱${p.price.toFixed(2)}</button>`;
             });
+            html += `</div>`;
+        }
+        document.getElementById('categoriesContainer').innerHTML = html;
+        nextStep(3);
+    }
+
+    function toggleCategory(id) { document.getElementById(id).classList.toggle('active'); }
+
+    function filterPromos() {
+        let input = document.getElementById('searchPromo').value.toLowerCase();
+        document.querySelectorAll('.promo-btn').forEach(btn => {
+            if (btn.innerText.toLowerCase().includes(input)) {
+                btn.style.display = "block";
+                btn.parentElement.classList.add('active'); 
+            } else {
+                btn.style.display = "none";
+            }
         });
-    </script>
+    }
+
+    function selectPromo(name, price) {
+        orderDetails.promo = name;
+        orderDetails.price = price;
+        document.getElementById('amountToPay').innerText = '₱' + price.toFixed(2);
+        nextStep(4);
+    }
+
+    function compressImage(event) {
+        let file = event.target.files[0];
+        if(!file) return;
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(e) {
+            let img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                let canvas = document.getElementById('canvas');
+                let ctx = canvas.getContext('2d');
+                let maxWidth = 600;
+                let scaleSize = maxWidth / img.width;
+                if (img.width < maxWidth) scaleSize = 1;
+                canvas.width = img.width * scaleSize;
+                canvas.height = img.height * scaleSize;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                orderDetails.imageBase64 = canvas.toDataURL("image/jpeg", 0.6); 
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+    }
+
+    function submitOrder() {
+        document.getElementById('submitBtn').style.display = 'none';
+        document.getElementById('loadingSpinner').style.display = 'block';
+
+        // SOLID FIX: URL Encoded format safely bypasses Google CORS blocks
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+            body: 'payload=' + encodeURIComponent(JSON.stringify(orderDetails))
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                nextStep(5);
+            } else {
+                alert("Error: " + data.message); 
+                document.getElementById('submitBtn').style.display = 'block';
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        })
+        .catch(err => {
+            alert("Connection Error. Please ensure you created a 'New deployment' version in Google Apps Script.");
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('loadingSpinner').style.display = 'none';
+        });
+    }
+</script>
+
 </body>
 </html>
