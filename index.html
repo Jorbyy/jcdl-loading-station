@@ -25,22 +25,21 @@
         .qr-section { text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; }
         .qr-section img { width: 200px; height: 200px; margin-bottom: 15px; border-radius: 10px;}
         .copy-box { background: #e9ecef; padding: 10px; border-radius: 5px; display: inline-block; margin-bottom: 20px; }
-        #loadingSpinner { display: none; text-align: center; margin-top: 20px; font-weight: bold; color: #e67e22; }
+        #loadingSpinner { text-align: center; margin-top: 20px; font-weight: bold; color: #3498db; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>JCDL Loading Station Hub</h2>
+    <div id="initLoader" style="text-align:center; padding: 20px; font-weight:bold; color:#e67e22;">Fetching Live Prices from Database...</div>
 
-    <!-- STEP 1: Phone Number -->
-    <div id="step1" class="step active">
+    <div id="step1" class="step">
         <label>Enter Mobile Number to Load:</label>
         <input type="tel" id="mobileNum" placeholder="09xxxxxxxxx" maxlength="11">
         <button class="btn-primary" onclick="nextStep(2)">Next</button>
     </div>
 
-    <!-- STEP 2: Choose Network -->
     <div id="step2" class="step">
         <label>Select Network:</label>
         <div class="grid">
@@ -54,7 +53,6 @@
         <button class="btn-primary" onclick="nextStep(1)" style="background:#7f8c8d;">Back</button>
     </div>
 
-    <!-- STEP 3: Choose Promo -->
     <div id="step3" class="step">
         <label>Search & Select Promo:</label>
         <input type="text" id="searchPromo" placeholder="Type to search..." onkeyup="filterPromos()">
@@ -62,11 +60,9 @@
         <button class="btn-primary" onclick="nextStep(2)" style="background:#7f8c8d; margin-top: 20px;">Back</button>
     </div>
 
-    <!-- STEP 4: Payment -->
     <div id="step4" class="step">
         <h3 style="text-align: center;">Scan to Pay</h3>
         <div class="qr-section">
-            <!-- This looks for a file named qr.jpg in your GitHub -->
             <img src="qr.jpg" alt="Upload qr.jpg to Github" onerror="this.src='https://via.placeholder.com/200?text=Upload+qr.jpg+to+Github'">
             <div>
                 <span class="copy-box">GCash: <strong id="gcashNum">09604504287</strong> (JTD)
@@ -78,11 +74,10 @@
         <input type="file" id="receiptImg" accept="image/*" onchange="compressImage(event)">
         <canvas id="canvas" style="display:none;"></canvas> 
         <button class="btn-primary" id="submitBtn" onclick="submitOrder()" disabled>Submit Payment</button>
-        <div id="loadingSpinner">Processing... Please wait...</div>
+        <div id="loadingSpinner" style="display:none;">Processing... Please wait...</div>
         <button class="btn-primary" onclick="nextStep(3)" style="background:#7f8c8d;">Back</button>
     </div>
 
-    <!-- STEP 5: Success Screen -->
     <div id="step5" class="step" style="text-align: center;">
         <h3 style="color: #2ecc71;">Order Submitted!</h3>
         <p>Your payment receipt has been sent to JCDL Loading Station.</p>
@@ -92,39 +87,25 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJch5blA4LoP0XPinXOL4N1KOt_6zlTXEL0QVEDYhRi35PyfRHwWDFknBQl-ifb-fOTQ/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJch5bIA4LoP0XPinXOL4N1KOt_6zITXEL0QVEDYhRi35PyfRHwWDFknBQl-ifb-fOTQ/exec";
 
     let orderDetails = { number: '', network: '', promo: '', price: 0, imageBase64: '' };
+    let promos = {}; // Will be filled dynamically from Google Sheets
 
-    const promos = {
-        'Globe': {
-            'Go Promos': [{name: 'Go59', price: 53.00}, {name: 'Go+99', price: 89.00}, {name: 'Go+129', price: 116.00}, {name: 'Go+140', price: 126.00}, {name: 'Go+149', price: 134.00}, {name: 'Go+250', price: 225.00}, {name: 'GoExtra59', price: 53.00}, {name: 'GoExtra99', price: 89.00}, {name: 'GoExtra109', price: 98.00}, {name: 'GoExtra179', price: 161.00}, {name: 'GoExtra199', price: 179.00}],
-            'Unli & Surf': [{name: 'Surf4all99', price: 89.00}, {name: 'Surf4all249', price: 224.00}, {name: 'GOUNLI20', price: 18.00}, {name: 'GOUNLI30', price: 27.00}, {name: 'GOUNLI50', price: 45.00}, {name: 'GOUNLI95', price: 86.00}, {name: 'GOUNLI180', price: 162.00}, {name: 'GOUNLI350', price: 315.00}, {name: 'Unli5G59', price: 53.00}, {name: 'Unli5G80', price: 72.00}, {name: 'GO59 For Students', price: 53.00}, {name: 'Go+99 Go Share etc.', price: 89.00}, {name: 'UnliGo99', price: 89.00}, {name: 'Go+109', price: 98.00}, {name: 'Go+179', price: 161.00}],
-            'Tingi Load': [{name: 'Tingi 1gb @12', price: 12.00}, {name: 'Tingi 1gb @32', price: 32.00}, {name: 'Tingi 1gb @52', price: 52.00}],
-            'Broadband': [{name: 'HOMESURF50', price: 45.00}, {name: 'HOMESURF199', price: 179.00}, {name: 'HOMESURF599', price: 539.00}, {name: 'HOMESURF999', price: 899.00}, {name: 'HOMESURF1499', price: 1349.00}, {name: 'UNLISURF 249', price: 224.00}, {name: 'UNLISURF 299', price: 269.00}, {name: 'UNLISURF 399', price: 359.00}, {name: 'UNLISURF 499', price: 449.00}, {name: 'UNLISURF 749', price: 674.00}, {name: 'UNLISURF 799', price: 719.00}, {name: 'UNLISURF 999', price: 899.00}, {name: 'UNLISURF 1599', price: 1439.00}]
-        },
-        'TM': {
-            'EZ Promos': [{name: 'EZ50 FUNALIW', price: 45.00}, {name: 'EZ75 ALLNET', price: 68.00}, {name: 'EZ99', price: 89.00}, {name: 'EZ110', price: 99.00}, {name: 'EZ50 5G', price: 45.00}, {name: 'EZ140', price: 126.00}, {name: 'EZ299', price: 269.00}, {name: 'EZ599', price: 539.00}, {name: 'EZPLAN159', price: 143.00}, {name: 'EZPLAN300', price: 270.00}],
-            'Surf & Combo': [{name: 'COMBO20', price: 18.00}, {name: 'PAWERSURF20', price: 18.00}, {name: 'PAWERSURF30', price: 27.00}, {name: 'FBML15', price: 14.00}, {name: 'ANS20', price: 18.00}, {name: 'ANS30', price: 27.00}, {name: 'SURF4ALL99', price: 89.00}, {name: 'ALLSURF99', price: 89.00}, {name: 'ALLSURF110', price: 99.00}, {name: 'ALLSURF149', price: 134.00}, {name: 'BIGBENTE', price: 18.00}, {name: 'COMBO10', price: 9.00}, {name: 'PawerSurf99', price: 89.00}, {name: 'AN10', price: 9.00}, {name: 'AN70', price: 63.00}]
-        },
-        'Smart': {
-            'Giga Promos': [{name: 'Giga Video/Stories 50', price: 48.00}, {name: 'Giga Video/Stories 99', price: 94.00}, {name: 'Giga Power 75', price: 71.00}, {name: 'Giga Power 149', price: 142.00}],
-            'Data & Magic': [{name: 'Surfsaya 49', price: 47.00}, {name: 'All data 50', price: 48.00}, {name: 'All data 99', price: 94.00}, {name: 'All data 299', price: 284.00}, {name: 'Magic Data 99', price: 94.00}, {name: 'Magic Data 199', price: 189.00}, {name: 'Magic Data 399', price: 379.00}],
-            'Other': [{name: 'All Net 30', price: 29.00}, {name: 'All Net 50', price: 48.00}, {name: 'All Net 99', price: 94.00}, {name: 'Tingi 1gb', price: 12.00}]
-        },
-        'TNT': {
-            'Surfsaya': [{name: 'Surfsaya 20', price: 19.00}, {name: 'Surfsaya 49', price: 47.00}],
-            'Other': [{name: 'TikTok saya 50', price: 48.00}, {name: 'Saya all 99', price: 94.00}, {name: 'ML 10', price: 10.00}, {name: 'FB+ML 50', price: 48.00}, {name: 'Panalo 30', price: 29.00}]
-        },
-        'Gomo': {
-            'Data Offers': [{name: 'NoExpiryData149', price: 134.00}, {name: 'NoExpiryData249', price: 224.00}, {name: 'NoExpiryData449', price: 404.00}, {name: 'UnliData799', price: 719.00}, {name: 'UnliData999', price: 899.00}, {name: 'UnliData1699', price: 1529.00}],
-            'Fiber': [{name: 'UnliFiber299', price: 269.00}, {name: 'UnliFiber399', price: 359.00}, {name: 'UnliFiber899', price: 809.00}, {name: 'UnliFiber1199', price: 1079.00}, {name: 'UnliFiber+UnliData349', price: 314.00}, {name: 'UnliFiber+UnliData399', price: 359.00}, {name: 'UnliFiber+UnliData449', price: 404.00}, {name: 'UnliFiber+UnliData499', price: 449.00}, {name: 'UnliFiber+UnliData649', price: 584.00}, {name: 'UnliFiber+UnliData699', price: 629.00}, {name: 'UnliFiber+UnliData1299', price: 1169.00}, {name: 'UnliFiber+UnliData1499', price: 1349.00}, {name: 'UnliFiber+UnliData1599', price: 1439.00}, {name: 'UnliFiber+UnliData1799', price: 1619.00}, {name: 'UnliFiber+UnliData2099', price: 1889.00}, {name: 'UnliFiber+UnliData2299', price: 2069.00}]
-        },
-        'DITO': {
-            'Level Up': [{name: 'Level up 99', price: 94.00}, {name: 'Level up 109', price: 104.00}, {name: 'Level up 129', price: 123.00}, {name: 'Level up 199', price: 189.00}, {name: 'Level up social 20', price: 19.00}, {name: 'Level up social 50', price: 48.00}, {name: 'Level up social 70', price: 67.00}],
-            'Data & Tingi': [{name: 'Data 20', price: 19.00}, {name: 'Data 30', price: 29.00}, {name: 'Data 50', price: 48.00}, {name: 'Data boosters-live it 50', price: 48.00}, {name: 'Data boosters-play it 50', price: 48.00}, {name: 'Tingi 1gb', price: 12.00}, {name: 'Tingi 2gb', price: 22.00}, {name: 'Tingi 3gb', price: 32.00}]
-        }
-    };
+    // Fetch Live Prices on Page Load
+    window.onload = function() {
+        fetch(WEB_APP_URL + "?action=getPromos")
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                promos = data.data;
+                document.getElementById('initLoader').style.display = 'none';
+                document.getElementById('step1').classList.add('active');
+            } else {
+                document.getElementById('initLoader').innerText = "Error loading prices. Check Google Sheet.";
+            }
+        });
+    }
 
     function nextStep(step) {
         if(step === 2 && document.getElementById('mobileNum').value.length < 10) {
@@ -138,7 +119,9 @@
     function selectNetwork(network) {
         orderDetails.network = network;
         let html = '';
-        let cats = promos[network];
+        let cats = promos[network] || {};
+        if (Object.keys(cats).length === 0) html = "<p>No promos found for this network.</p>";
+        
         for (let category in cats) {
             let catId = category.replace(/[^a-zA-Z0-9]/g, '');
             html += `<div class="category-header" onclick="toggleCategory('${catId}')">${category} ▼</div>`;
@@ -200,7 +183,6 @@
         document.getElementById('submitBtn').style.display = 'none';
         document.getElementById('loadingSpinner').style.display = 'block';
 
-        // SOLID FIX: URL Encoded format safely bypasses Google CORS blocks
         fetch(WEB_APP_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
@@ -213,16 +195,17 @@
             } else {
                 alert("Error: " + data.message); 
                 document.getElementById('submitBtn').style.display = 'block';
-                document.getElementById('loadingSpinner').style.display = 'none';
-            }
-        })
-        .catch(err => {
-            alert("Connection Error. Please ensure you created a 'New deployment' version in Google Apps Script.");
-            document.getElementById('submitBtn').style.display = 'block';
-            document.getElementById('loadingSpinner').style.display = 'none';
-        });
-    }
-</script>
+                document.getElementById('loadingSpinner').style.display =You are completely right. If you want the freedom to update prices on the fly without touching any code, hardcoding is not the best approach, and it does make the Google Sheet useless for that specific purpose. 
 
-</body>
-</html>
+To achieve exactly what you want—**live price updates** and **automatic balance deduction**—we need to shift the heavy lifting over to your Google Sheet and Google Apps Script. 
+
+Here is how we can set that up:
+
+**1. Live Promo Updates (Dynamic Fetching)**
+Instead of hardcoding the promos in GitHub, we will create a dedicated tab in your Google Sheet (e.g., "PriceList"). Your website will talk to your Google Web App every time a customer opens the page, instantly pulling the latest promos and prices directly from that sheet. If you change a price in the sheet, it updates on the website immediately.
+
+**2. Auto-Deducting Load Balances**
+We can designate a specific cell in "Sheet1" (for example, Cell B1) as your "Current Load Wallet Balance." When a customer submits an order, the Google Apps Script will record the transaction and automatically subtract that promo's price from your total balance. 
+
+**Are you ready to make this switch?** 
+If so, the first step is organizing your Google Sheet. Let me know if you'd like me to give you the exact layout to use for your tabs (one for Orders/Balances, one for the Price List), and then I can provide the new Google Apps Script and the updated HTML to connect it all!
