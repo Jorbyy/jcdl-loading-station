@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCDL Loading Station Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; max-width: 500px; width: 100%; padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        .step { display: none; }
+        .step.active { display: block; }
+        label { display: block; margin-bottom: 10px; font-weight: bold; }
+        input[type="tel"], input[type="text"], input[type="file"] { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .sq-btn { padding: 20px 10px; border: 2px solid #e0e0e0; border-radius: 10px; background: #fff; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.2s; }
+        .sq-btn:hover { border-color: #3498db; background: #f0f8ff; }
+        
+        /* Category Styles */
+        .category-header { background: #34495e; color: white; padding: 12px; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
+        .promo-list { display: none; padding-left: 10px; margin-bottom: 20px; }
+        .promo-list.active { display: block; }
+        .promo-btn { display: block; width: 100%; text-align: left; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; }
+        .promo-btn:hover { border-color: #3498db; }
+        
+        .btn-primary { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-primary:disabled { background: #95a5a6; cursor: not-allowed; }
+        .qr-section { text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; }
+        .qr-section img { width: 200px; height: 200px; margin-bottom: 15px; }
+        .copy-box { background: #e9ecef; padding: 10px; border-radius: 5px; display: inline-block; margin-bottom: 20px; }
+        #loadingSpinner { display: none; text-align: center; margin-top: 20px; font-weight: bold; color: #e67e22; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>JCDL Loading Station Hub</h2>
+
+    <!-- STEP 1: Phone Number -->
+    <div id="step1" class="step active">
+        <label>Enter Mobile Number to Load:</label>
+        <input type="tel" id="mobileNum" placeholder="09xxxxxxxxx" maxlength="11">
+        <button class="btn-primary" onclick="nextStep(2)">Next</button>
+    </div>
+
+    <!-- STEP 2: Choose Network -->
+    <div id="step2" class="step">
+        <label>Select Network:</label>
+        <div class="grid">
+            <button class="sq-btn" onclick="selectNetwork('Globe')">Globe (10% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('TM')">TM (10% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('Smart')">Smart (5% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('TNT')">TNT (5% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('Gomo')">Gomo (10% OFF)</button>
+            <button class="sq-btn" onclick="selectNetwork('DITO')">DITO</button>
+        </div>
+        <button class="btn-primary" onclick="nextStep(1)" style="background:#7f8c8d;">Back</button>
+    </div>
+
+    <!-- STEP 3: Choose Promo -->
+    <div id="step3" class="step">
+        <label>Search & Select Promo:</label>
+        <input type="text" id="searchPromo" placeholder="Type to search (e.g., Giga Power)" onkeyup="filterPromos()">
+        <div id="categoriesContainer"></div>
+        <button class="btn-primary" onclick="nextStep(2)" style="background:#7f8c8d; margin-top: 20px;">Back</button>
+    </div>
+
+    <!-- STEP 4: Payment -->
+    <div id="step4" class="step">
+        <h3 style="text-align: center;">Scan to Pay</h3>
+        <div class="qr-section">
+            <!-- ADD YOUR GCASH QR IMAGE LINK HERE -->
+            <img src="https://via.placeholder.com/200?text=JTD+GCash+QR" alt="GCash QR">
+            <div>
+                <span class="copy-box">GCash: <strong id="gcashNum">09604504287</strong> (JTD)
+                <button onclick="navigator.clipboard.writeText('09604504287'); alert('Copied!');" style="cursor:pointer; margin-left: 5px;">Copy</button></span>
+            </div>
+            <p>Please pay: <strong id="amountToPay" style="color:#27ae60; font-size: 22px;">₱0.00</strong></p>
+        </div>
+        <label>Upload Payment Receipt:</label>
+        <input type="file" id="receiptImg" accept="image/*" onchange="checkFile()">
+        <button class="btn-primary" id="submitBtn" onclick="submitOrder()" disabled>Submit Payment</button>
+        <div id="loadingSpinner">Processing... Please wait...</div>
+        <button class="btn-primary" onclick="nextStep(3)" style="background:#7f8c8d;">Back</button>
+    </div>
+
+    <!-- STEP 5: Success Screen -->
+    <div id="step5" class="step" style="text-align: center;">
+        <h3 style="color: #2ecc71;">Order Submitted!</h3>
+        <p>Your payment receipt has been sent to JCDL Loading Station.</p>
+        <p style="font-weight: bold; font-size: 18px;" id="statusText">Status: Pending Verification...</p>
+        <p style="margin-top: 20px; font-size: 14px; color: #7f8c8d;">Kindly check your phone in a few minutes to see if it's loaded already.</p>
+        <button class="btn-primary" onclick="location.reload()" style="margin-top: 30px;">Load Another Number</button>
+    </div>
+
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJch5blA4LoP0XPinXOL4N1KOt_6zlTXEL0QVEDYhRi35PyfRHwWDFknBQI-ifb-fOTQ/exec";
+
+    let orderDetails = { number: '', network: '', promo: '', price: 0, imageBase64: '' };
+
+    const promos = {
+        'Globe': {
+            'Go Promos': [{name: 'Go59', price: 53.10}, {name: 'Go+99', price: 89.10}, {name: 'GoExtra199', price: 179.10}],
+            'Unli Promos': [{name: 'Unli5G59', price: 53.10}, {name: 'GOUNLI50', price: 44.00}]
+        },
+        'Smart': {
+            'Giga Video': [{name: 'Giga Video 50', price: 48.15}, {name: 'Giga Video 99', price: 96.30}],
+            'Giga Power': [{name: 'Giga Power 75', price: 74.90}, {name: 'Giga Power 149', price: 144.45}],
+            'Magic Data': [{name: 'Magic Data 99', price: 105.93}, {name: 'Magic Data 199', price: 212.93}]
+        },
+        'TM': {
+            'EZ Promos': [{name: 'EZ50 5G', price: 45.00}, {name: 'EZ99', price: 89.10}, {name: 'EZ299', price: 269.10}],
+            'Surf': [{name: 'PawerSurf99', price: 89.10}, {name: 'ALLSURF99', price: 89.10}]
+        },
+        'TNT': {
+            'Surfsaya': [{name: 'Surfsaya 20', price: 21.40}, {name: 'Surfsaya 49', price: 51.36}],
+            'Other': [{name: 'ML 10', price: 10.70}, {name: 'FB+ML 50', price: 53.50}]
+        },
+        'Gomo': {
+            'Data Offers': [{name: 'NoExpiryData149', price: 134.10}, {name: 'UnliData999', price: 899.10}]
+        },
+        'DITO': {
+            'Level Up': [{name: 'Level up 99', price: 99.00}, {name: 'Level up 199', price: 189.05}],
+            'Data': [{name: 'Data 50', price: 50.00}]
+        }
+    };
+
+    function nextStep(step) {
+        if(step === 2 && document.getElementById('mobileNum').value.length < 10) {
+            alert('Please enter a valid mobile number');
+            return;
+        }
+        if(step === 2) orderDetails.number = document.getElementById('mobileNum').value;
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+    }
+
+    function selectNetwork(network) {
+        orderDetails.network = network;
+        let html = '';
+        let cats = promos[network];
+        
+        for (let category in cats) {
+            html += `<div class="category-header" onclick="toggleCategory('${category.replace(/\s/g, '')}')">${category} ▼</div>`;
+            html += `<div class="promo-list" id="${category.replace(/\s/g, '')}">`;
+            cats[category].forEach(p => {
+                html += `<button class="promo-btn" onclick="selectPromo('${p.name}', ${p.price})"><strong>${p.name}</strong> - ₱${p.price.toFixed(2)}</button>`;
+            });
+            html += `</div>`;
+        }
+        document.getElementById('categoriesContainer').innerHTML = html;
+        nextStep(3);
+    }
+
+    function toggleCategory(id) {
+        document.getElementById(id).classList.toggle('active');
+    }
+
+    function filterPromos() {
+        let input = document.getElementById('searchPromo').value.toLowerCase();
+        let btns = document.querySelectorAll('.promo-btn');
+        btns.forEach(btn => {
+            if (btn.innerText.toLowerCase().includes(input)) {
+                btn.style.display = "block";
+                btn.parentElement.classList.add('active'); 
+            } else {
+                btn.style.display = "none";
+            }
+        });
+    }
+
+    function selectPromo(name, price) {
+        orderDetails.promo = name;
+        orderDetails.price = price;
+        document.getElementById('amountToPay').innerText = '₱' + price.toFixed(2);
+        nextStep(4);
+    }
+
+    function checkFile() {
+        let file = document.getElementById('receiptImg').files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(e) { orderDetails.imageBase64 = e.target.result; };
+            reader.readAsDataURL(file);
+            document.getElementById('submitBtn').disabled = false;
+        }
+    }
+
+    function submitOrder() {
+        document.getElementById('submitBtn').style.display = 'none';
+        document.getElementById('loadingSpinner').style.display = 'block';
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(orderDetails)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                nextStep(5);
+            } else {
+                alert("Error: " + data.message); 
+                document.getElementById('submitBtn').style.display = 'block';
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        })
+        .catch(err => {
+            alert("Something went wrong checking the connection.");
+        });
+    }
+</script>
+
+</body>
+</html>
